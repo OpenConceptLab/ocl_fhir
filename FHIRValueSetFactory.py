@@ -21,22 +21,31 @@ def build_from_dictionary(ocl_collection):
     vs.url              = ocl_collection['extras']['uri']
 
     compose = ValueSetCompose()
-    compose_include = ValueSetComposeInclude()
-    compose_include.concept = []
+    compose.include = []
 
     url_concepts = ocl_collection['concepts_url']
     concepts = OCLAPI.get(url_concepts)
 
+    source_map = {}
     for concept in concepts:
+        source_url = concept['owner_url'] + 'sources/' + concept['source']
+        if source_url not in source_map.keys():
+            source_map[source_url] = []
+
         include_concept = ValueSetComposeIncludeConcept()
         include_concept.code     = concept['id']
         include_concept.display  = concept['display_name']
-        compose_include.concept.append(include_concept)
+        source_map[source_url].append(include_concept)
 
-    compose.include = [compose_include]
+    for source_url in source_map.keys():
+        source = OCLAPI.get(source_url)
+        compose_include = ValueSetComposeInclude()
+        compose_include.system = source['extras']['uri']
+        compose_include.concept = source_map[source_url]
+        compose.include.append(compose_include)
+
     vs.compose = compose
 
-    # vs.compose
     # vs.contact
     # vs.contained
     # vs.copyright
