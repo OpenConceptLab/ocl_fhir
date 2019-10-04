@@ -4,6 +4,7 @@ from fhir.resources.valueset import fhirdate
 from fhir.resources.valueset import ValueSetCompose
 from fhir.resources.valueset import ValueSetComposeInclude
 from fhir.resources.valueset import ValueSetComposeIncludeConcept
+from fhir.resources.identifier import Identifier
 
 def build_from_dictionary(ocl_collection):
 
@@ -19,6 +20,12 @@ def build_from_dictionary(ocl_collection):
     vs.status           = 'active'
     vs.title            = ocl_collection['extras']['Title']
     vs.url              = ocl_collection['extras']['uri']
+
+    oid_identifier = Identifier()
+    oid_identifier.system = "urn:ietf:rfc:3986"
+    oid_identifier.value  = "urn:oid:" + ocl_collection['extras']['OID']
+    vs.identifier = []
+    vs.identifier.append(oid_identifier)
 
     compose = ValueSetCompose()
     compose.include = []
